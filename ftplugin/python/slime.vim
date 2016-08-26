@@ -1,6 +1,6 @@
 
 function! _EscapeText_python(text)
-  if exists('g:slime_python_ipython') && len(split(a:text,"\n")) > 1
+  if exists('g:slime_python_ipython') && len(split(a:text,"\n")) > 1 && g:slime_target != 'nuke'
     return ["%cpaste\n", a:text."--\n"]
   else
     let empty_lines_pat = '\(^\|\n\)\zs\(\s*\n\+\)\+'

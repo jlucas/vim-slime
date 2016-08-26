@@ -44,6 +44,23 @@ function! s:ScreenConfig() abort
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Nuke
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+function! s:NukeSend(config, text)
+  call s:WritePasteFile(a:text)
+  " FIXME: shell and netcat dependencies
+  call system("echo -n " . g:slime_paste_file . " | " . "nc localhost " . b:slime_config["port"])
+endfunction
+
+function! s:NukeConfig() abort
+  if !exists("b:slime_config")
+    let b:slime_config = {"port": "10191"}
+  end
+  let b:slime_config["port"] = input("port: ", b:slime_config["port"])
+endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Tmux
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
