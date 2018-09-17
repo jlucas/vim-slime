@@ -17,7 +17,7 @@ function! Perhaps_prepend_let(lines)
         let l:line  = l:lines[0]
 
         " Prepend let if the line is an assignment
-        if (l:line =~ "=" || l:line =~ "::") && !Is_type_declaration(l:line)
+        if (l:line =~ "=[^>]" || l:line =~ "::") && !Is_type_declaration(l:line)
             let l:lines[0] = "let " . l:lines[0]
         endif
 
@@ -92,30 +92,44 @@ function! Unlines(lines)
     return join(a:lines, "\n") . "\n"
 endfunction
 
+function! FilterImportLines(lines)
+    let l:matches = []
+    let l:noMatches = []
+    for l:line in a:lines
+        if l:line =~ "^import"
+            call add(l:matches, l:line)
+        else
+            call add(l:noMatches, l:line)
+        endif
+    endfor
+    return [l:matches, l:noMatches]
+endfunction
+
 " vim slime handler
 function! _EscapeText_lhaskell(text)
     let l:text  = Remove_block_comments(a:text)
     let l:lines = Lines(Tab_to_spaces(l:text))
     let l:lines = Remove_initial_gt(l:lines)
-    let l:lines = Remove_line_comments(l:lines)
+    let [l:imports, l:nonImports] = FilterImportLines(l:lines)
+    let l:lines = Remove_line_comments(l:nonImports)
     let l:lines = Perhaps_prepend_let(l:lines)
     let l:lines = Indent_lines(l:lines)
     let l:lines = Wrap_if_multi(l:lines)
-    return Unlines(l:lines)
+    return Unlines(l:imports + l:lines)
 endfunction
 
 function! _EscapeText_haskell(text)
     let l:text  = Remove_block_comments(a:text)
     let l:lines = Lines(Tab_to_spaces(l:text))
-    let l:lines = Remove_line_comments(l:lines)
+    let [l:imports, l:nonImports] = FilterImportLines(l:lines)
+    let l:lines = Remove_line_comments(l:nonImports)
     let l:lines = Perhaps_prepend_let(l:lines)
     let l:lines = Indent_lines(l:lines)
     let l:lines = Wrap_if_multi(l:lines)
-    return Unlines(l:lines)
+    return Unlines(l:imports + l:lines)
 endfunction
 
 function! _EscapeText_haskell_script(text)
-    echo "ok"
     let l:text  = Remove_block_comments(a:text)
     let l:lines = Lines(Tab_to_spaces(l:text))
     let l:lines = Remove_line_comments(l:lines)
